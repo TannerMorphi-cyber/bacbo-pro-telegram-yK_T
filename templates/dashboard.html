@@ -1,12 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC BO PRO - Tanner Edition</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>BAC BO PRO</h1>
+    <p style="text-align:center; color:#aaa;">by TannerMorphy-cyber</p>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Big Road</h3>
+            <div class="big-road" id="bigroad">Cargando...</div>
+        </div>
+
+        <div class="card">
+            <h3>Racha Actual</h3>
+            <h2 id="streak">-</h2>
+        </div>
+
+        <div class="card">
+            <h3>Próxima Predicción</h3>
+            <div id="pred">Esperando...</div>
+            <div id="prob"></div>
+        </div>
+
+        <div class="card">
+            <h3>Envío Manual</h3>
+            <button class="btn" onclick="sendNow()">ENVIAR SEÑAL AHORA</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Centro de Estrategias Dinámicas</h3>
+        <textarea id="strategyInput" placeholder='Ej: {"name":"Ruptura fuerte","condition":"streak >= 6","action":"opposite","boost":20}'></textarea>
+        <button class="btn" onclick="saveStrategy()">GUARDAR Y ACTIVAR</button>
+    </div>
+</div>
+
 <script>
 const secret = prompt("Clave secreta (SECRET_HEADER):", "Tanner2025") || "Tanner2025";
 
 function update() {
-    fetch("/api/status").then(r => r.json()).then(d => {
-        // Racha
-        document.getElementById("streak").innerHTML = 
-            d.current_streak.length > 0 ? 
-            `${d.current_streak.winner} ×${d.current_streak.length}` : "Sin racha";
+    fetch("/api/status")
+    .then(r => r.json())
+    .then(d => {
+        // Racha actual
+        document.getElementById("streak").innerHTML = d.current_streak?.length > 0 
+            ? `${d.current_streak.winner} ×${d.current_streak.length}` 
+            : "Sin racha";
 
         // Predicción
         document.getElementById("pred").innerHTML = `<h2>${d.prediction.winner}</h2>`;
@@ -15,20 +60,24 @@ function update() {
         document.getElementById("prob").innerHTML = 
             `<span class="${riskClass}">${d.prediction.probability.toFixed(1)}% • ${d.prediction.risk}</span><br><small>${d.prediction.reason}</small>`;
 
-        // Big Road
+        // Big Road (muestra P o B)
         let road = "";
-        d.big_road.flat().forEach(w => {
-            road += `<div class="bead ${w}">P</div>`;
+        d.big_road.flat().forEach((winner, i) => {
+            const color = winner === "Player" ? "P" : "B";
+            road += `<div class="bead ${color}">${color}</div>`;
         });
-        document.getElementById("bigroad").innerHTML = road || "Sin manos registradas";
-    }).catch(err => console.log("Error actualización:", err));
+        document.getElementById("bigroad").innerHTML = road || "Sin manos";
+    })
+    .catch(err => console.log("Error:", err));
 }
 
 function sendNow() {
     fetch("/send_signal", {
         method: "POST",
         headers: {"X-Secret": secret}
-    }).then(() => alert("Señal enviada a Telegram!")).catch(err => alert("Error: " + err));
+    })
+    .then(() => alert("Señal enviada a Telegram!"))
+    .catch(() => alert("Error al enviar"));
 }
 
 function saveStrategy() {
@@ -40,7 +89,8 @@ function saveStrategy() {
             method: "POST",
             headers: {"X-Secret": secret, "Content-Type": "application/json"},
             body: JSON.stringify(strat)
-        }).then(() => {
+        })
+        .then(() => {
             alert("Estrategia guardada y activada!");
             document.getElementById("strategyInput").value = "";
         });
@@ -49,7 +99,8 @@ function saveStrategy() {
     }
 }
 
-// Actualiza cada 4 segundos
 setInterval(update, 4000);
 update();
 </script>
+</body>
+</html>

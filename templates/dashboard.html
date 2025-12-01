@@ -1,58 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAC BO PRO - Tanner Edition</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <style>
-        .bead { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
-        .P { background: #0066ff; color: white; }
-        .B { background: #ff3333; color: white; }
-        .big-road { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 15px 0; }
-        .risk-low { color: #00ff9d; }
-        .risk-med { color: #ffeb3b; }
-        .risk-high { color: #ff4444; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>🔥 BAC BO PRO 🔥</h1>
-    <p style="text-align:center; color:#aaa;">by TannerMorphy-cyber</p>
+<script>
+const secret = prompt("Clave secreta (SECRET_HEADER):", "Tanner2025") || "Tanner2025";
 
-    <div class="grid">
-        <div class="card">
-            <h3>Big Road (Últimas 36 manos)</h3>
-            <div class="big-road" id="bigroad">Sin datos aún...</div>
-        </div>
+function update() {
+    fetch("/api/status").then(r => r.json()).then(d => {
+        // Racha
+        document.getElementById("streak").innerHTML = 
+            d.current_streak.length > 0 ? 
+            `${d.current_streak.winner} ×${d.current_streak.length}` : "Sin racha";
 
-        <div class="card">
-            <h3>Racha Actual</h3>
-            <h2 id="streak">-</h2>
-        </div>
+        // Predicción
+        document.getElementById("pred").innerHTML = `<h2>${d.prediction.winner}</h2>`;
+        const riskClass = d.prediction.risk === "Bajo" ? "risk-low" : 
+                         d.prediction.risk === "Medio" ? "risk-med" : "risk-high";
+        document.getElementById("prob").innerHTML = 
+            `<span class="${riskClass}">${d.prediction.probability.toFixed(1)}% • ${d.prediction.risk}</span><br><small>${d.prediction.reason}</small>`;
 
-        <div class="card">
-            <h3>Próxima Predicción</h3>
-            <div id="pred">Esperando datos...</div>
-            <div id="prob" style="margin-top:10px; font-size:18px;"></div>
-        </div>
+        // Big Road
+        let road = "";
+        d.big_road.flat().forEach(w => {
+            road += `<div class="bead ${w}">P</div>`;
+        });
+        document.getElementById("bigroad").innerHTML = road || "Sin manos registradas";
+    }).catch(err => console.log("Error actualización:", err));
+}
 
-        <div class="card">
-            <h3>Envío Manual</h3>
-            <button class="btn" onclick="sendNow()">ENVIAR SEÑAL AHORA</button>
-        </div>
-    </div>
+function sendNow() {
+    fetch("/send_signal", {
+        method: "POST",
+        headers: {"X-Secret": secret}
+    }).then(() => alert("Señal enviada a Telegram!")).catch(err => alert("Error: " + err));
+}
 
-    <div class="card" style="margin-top:20px;">
-        <h3>Estrategias Rápidas</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <button class="btn" onclick="alert('Ruptura tras 5+ activada')">Ruptura tras 5+</button>
-            <button class="btn" onclick="alert('Seguir racha activado')">Seguir racha</button>
-            <button class="btn" onclick="alert('Anti-Chop activado')">Anti-Chop</button>
-            <button class="btn red" onclick="alert('Martingala activada')">Martingala</button>
-        </div>
-    </div>
+function saveStrategy() {
+    const input = document.getElementById("strategyInput").value.trim();
+    if (!input) return alert("Escribe una estrategia");
+    try {
+        const strat = JSON.parse(input);
+        fetch("/api/strategy", {
+            method: "POST",
+            headers: {"X-Secret": secret, "Content-Type": "application/json"},
+            body: JSON.stringify(strat)
+        }).then(() => {
+            alert("Estrategia guardada y activada!");
+            document.getElementById("strategyInput").value = "";
+        });
+    } catch(e) {
+        alert("JSON inválido");
+    }
+}
 
-    <div class="card" style="margin-top:20px;">
-        <h3>Centro de Estrategias Dinámicas</h3>
-        <textarea id="strategyInput" placeholder='Ejemplo:&#10;{&#10;  "name": "Ruptura fuerte
+// Actualiza cada 4 segundos
+setInterval(update, 4000);
+update();
+</script>

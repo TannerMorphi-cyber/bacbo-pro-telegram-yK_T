@@ -1,0 +1,113 @@
+/* static/style.css - Bac Bo Pro (diseño profesional y responsive) */
+* { box-sizing: border-box; }
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0d0d1a;
+    color: #fff;
+    margin: 0;
+    padding: 15px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #00ff9d;
+    font-size: 28px;
+    margin: 10px 0 5px;
+}
+
+h1 + p {
+    text-align: center;
+    color: #888;
+    margin-top: 0;
+}
+
+.grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    margin: 20px 0;
+}
+
+.card {
+    background: #1a1a2e;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.card h3 {
+    margin: 0 0 15px 0;
+    color: #00ff9d;
+    font-size: 18px;
+}
+
+.big-road {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px;
+    justify-content: center;
+}
+
+.bead {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    border: 2px solid #333;
+}
+
+.P { background: #0066ff; color: white; }
+.B { background: #ff3333; color: white; }
+
+.btn {
+    background: #00ff9d;
+    color: #000;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: all 0.2s;
+}
+
+.btn:hover { background: #00cc7a; }
+.btn.red { background: #ff3366; }
+.btn.red:hover { background: #cc0033; }
+
+textarea {
+    width: 100%;
+    height: 140px;
+    background: #111;
+    color: #0f0;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.risk-low { color: #00ff9d; font-weight: bold; }
+.risk-med { color: #ffeb3b; font-weight: bold; }
+.risk-high { color: #ff4444; font-weight: bold; }
+
+small { opacity: 0.8; font-size: 13px; }
+
+@media (max-width: 600px) {
+    .big-road { grid-template-columns: repeat(5, 1fr); }
+    .bead { width: 38px; height: 38px; font-size: 11px; }
+}
